@@ -266,8 +266,8 @@ def ean_lookup(query: str) -> str:
         # Determina quantos resultados retornar baseado na query
         query_words = query.strip().split()
         if len(query_words) <= 1:
-            # Query genérica (ex: "frango") -> 3 resultados (economia de tokens)
-            max_results = 3
+            # Query genérica (ex: "frango") -> 5 resultados (bom equilíbrio)
+            max_results = 5
         else:
             # Query específica (ex: "peito de frango") -> 5 resultados
             max_results = 5
