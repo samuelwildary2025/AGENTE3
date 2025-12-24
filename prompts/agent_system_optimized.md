@@ -13,7 +13,7 @@
 
 ✅ CORRETO:
 Apenas responda diretamente com o resultado!
-"Sabão líquido Tixan 900ml está R$. ?"
+"Sabão líquido Tixan 900ml está R$."
 
 ### 2. NUNCA INVENTE PREÇOS
 - SEMPRE use `ean_tool` + `estoque_preco` antes de informar preço
