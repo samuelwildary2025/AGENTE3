@@ -408,23 +408,36 @@ def run_agent_langgraph(telefone: str, mensagem: str) -> Dict[str, Any]:
             
             # FALLBACK INTELIGENTE: Analisa as mensagens de tool para gerar resposta útil
             tool_results = []
+            produtos_encontrados = []
+            
             for msg in result.get("messages", []):
                 if hasattr(msg, 'content') and isinstance(msg.content, str):
                     content = msg.content
                     # Detectar resposta de estoque vazio
                     if "0 item" in content or "disponíveis após filtragem" in content or "[]" in content:
                         tool_results.append("sem_estoque")
-                    # Detectar busca de EAN
+                    # Detectar busca de EAN e extrair nomes dos produtos
                     elif "EANS_ENCONTRADOS" in content:
                         tool_results.append("ean_encontrado")
+                        # Extrair nomes dos produtos (formato: "1) EAN - NOME PRODUTO")
+                        import re
+                        matches = re.findall(r'\d+\) \d+ - ([A-Z][^\n;]+)', content)
+                        if matches:
+                            produtos_encontrados.extend(matches[:3])  # Pegar até 3 produtos
                     # Detectar produto não encontrado
                     elif "Nenhum produto encontrado" in content or "não encontrado" in content.lower():
                         tool_results.append("nao_encontrado")
             
             # Gerar resposta baseada nos resultados das tools
             if "sem_estoque" in tool_results:
-                output = "Não temos esse produto disponível no momento. Quer outro?"
-                logger.info("🔄 Fallback inteligente: produto sem estoque")
+                if produtos_encontrados:
+                    # Oferecer alternativas da lista de produtos encontrados
+                    alternativas = ", ".join(produtos_encontrados[:2])
+                    output = f"Não temos esse produto disponível. Temos: {alternativas}. Quer algum desses?"
+                    logger.info(f"🔄 Fallback inteligente: oferecendo alternativas - {alternativas}")
+                else:
+                    output = "Não temos esse produto disponível no momento. Quer outro?"
+                    logger.info("🔄 Fallback inteligente: produto sem estoque, sem alternativas")
             elif "nao_encontrado" in tool_results:
                 output = "Não achei esse produto. Pode descrever de outra forma?"
                 logger.info("🔄 Fallback inteligente: produto não encontrado")
